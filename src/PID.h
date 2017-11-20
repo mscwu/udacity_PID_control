@@ -1,3 +1,5 @@
+#include <uWS/uWS.h>
+
 #ifndef PID_H
 #define PID_H
 
@@ -9,6 +11,10 @@ public:
   double p_error;
   double i_error;
   double d_error;
+  double total_error;
+  bool is_initial_run;
+  double best_error;
+  bool twiddle_once;
 
   /*
   * Coefficients
@@ -40,7 +46,23 @@ public:
   /*
   * Calculate the total PID error.
   */
-  double TotalError();
+	void TotalError(double cte);
+
+	/*
+	* Anti wind up algorithm to prevent integration error from saturating the actuator
+	*/
+	double AntiWindup(double k, double command, double PD_error, double max_command, double min_command);
+
+	/*
+	* Reset errors
+	*/
+	void ResetPIDError();
+
+  /*
+  * Restart the server
+  * https://discussions.udacity.com/t/twiddle-application-in-pid-controller/243427/9
+  */
+  void Restart(uWS::WebSocket<uWS::SERVER> ws);
 };
 
 #endif /* PID_H */
