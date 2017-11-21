@@ -3,6 +3,51 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Project Reflection
+
+### Description of PID Parameters
+
+The best analogy of PID controllers will be a mass-spring-damper (mks) system.
+
+#### Proportional Control
+
+The proportional control is the spring in the MKS system. The control input created by the P parameter is proportional to the deviation of the system output from the set point.  
+In this case, the control force, i.e., steer angle, will be proportional to the cross-track-error (cte).  
+A larger P, corresponding to a stiffer spring, provides fast response. However, when P parameter is too large, the system becomes oscillitary and has large overshoot.
+
+#### Derivative Control
+
+Derivative control is the damper in the MKS system. The faster the system output approaches the set point, the larger the damping force, acting to counter the effect of proportional control.  
+A good implementation of derivative control improves settling time of the system and stablizes the system. However, derivative control responses to high frequency changes in system output caused by disturbances.  
+In this project, the sharp curves create spikes in set point values. CTE would suddenly increase due to the presence of a curve and thus cause drastic reaction of derivative control. I chose not to use a very high derivative gain.
+
+#### Integral Control
+
+Integral Control is aimed at reducing the systematic error in the system. For example, for a mass hanging vertically by a spring and damper, due to the presence of gravitational force, the set point, will be influenced by the weight of the mass and thus cannot be set at will. However, if an integral control gain is used, the deviation from set point caused by the gravity will be canceled by the accumulation of error because the magnitude of integral control force is propotional to the integral of the error.
+
+### Choosing PID Parameters
+
+#### Manual Tuning
+
+Before automatic parameter tuning could be used, I manually tuned the parameters to make sure that the car can drive around the track reliably.  
+I started with using P parameter only and observed the response of the car on the straight.  
+When a small Kp is used, the car barely turned as the track went into a gradual left turn. I then kept increasing P value and stopped before the car responsed with large overshoot.  
+Ki was kept relatively small. Too large a Ki value cause the system to overshoot.  
+Finally, a small amount of Kd was added just enough to dampen out the jerky steering on the straigh line.
+
+#### Twiddle Tuning
+
+A twiddle algorithm as taught in the class was implemented in this project. Every time the car completed a lap, the simulator was reset and the total CTE error would be calculated. Each parameter would be increased or decreased accordingly.
+
+### Final Result
+
+I chose Kp = 0.122, Ki = 0.001, Kd = 0.4 as the final solution. This set of parameters provide a very smooth ride around the track at consistent speed and the car also runs very robustly when the number of laps becomes larger.
+
+### Integration Anti Windup
+
+I used an anti-windup scheme in the PID controller. The idea is that, when the integration error caused by sudden change of set point, i.e., a sharp curve, causes a spike in integration control force, the actuator (steer angle) would be saturated. This is undesirable and causes degraded performance of the controller. To deal with this, a method called "back-calculation" was deployed. When the control effort was going to saturated the actuator, instead of the actual accumulated integration error, an error that barely saturated the actuator was used. This essentially prevented the integration error from keeping accumulating and eventually blowing up the actuator. Although the PID controller worked well in this project and the anti-windup mechnism was not necessary in the end, it is still a good practice to protect the controller from winding up.
+---
+
 ## Dependencies
 
 * cmake >= 3.5
