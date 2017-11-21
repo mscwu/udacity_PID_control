@@ -36,12 +36,18 @@ int main()
   PID pid;
   // TODO: Initialize the pid variable.
 
-  // initialize this for validation lap
-  double p[3] = {0.122, 0.001, 0.4};
-  // initialize this for tuning lap
-  // double p[3] = {0.12, 0.001, 0.4};
-  double dp[3] = {0.002, 0.00005, 0.005};
+  bool tuning = false;
 
+  // initialize this for validation lap
+  double p[3] = {0.122, 0.001, 0.4};  
+  if (tuning) {
+    // initialize this for tuning lap
+    p[0] = 0.12;
+    p[1] = 0.001;
+    p[2] = 0.4;
+  }
+  double dp[3] = {0.002, 0.00005, 0.005};
+  
   pid.Init(p[0], p[1], p[2]);
 
   const int transition_steps = 30;
@@ -60,7 +66,7 @@ int main()
 
 
 
-  h.onMessage([&pid, &step, &transition_steps, &max_step, &p, &dp, &i, &epoch, &max_it, &max_speed](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &step, &transition_steps, &max_step, &p, &dp, &i, &epoch, &max_it, &max_speed, &tuning](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -84,7 +90,7 @@ int main()
           double min_steer = -1;
 
       		
-          if (step > transition_steps && (epoch < max_it)) {
+          if (step > transition_steps && (epoch < max_it) && tuning) {
           	// accumulate error
           	pid.TotalError(cte);
 
