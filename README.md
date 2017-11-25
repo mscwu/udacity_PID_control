@@ -46,6 +46,7 @@ I chose Kp = 0.122, Ki = 0.001, Kd = 0.4 as the final solution. This set of para
 ### Integration Anti Windup
 
 I used an anti-windup scheme in the PID controller. The idea is that, when the integration error caused by sudden change of set point, i.e., a sharp curve, causes a spike in integration control force, the actuator (steer angle) would be saturated. This is undesirable and causes degraded performance of the controller. To deal with this, a method called "back-calculation" was deployed. When the control effort was going to saturated the actuator, instead of the actual accumulated integration error, an error that barely saturated the actuator was used. This essentially prevented the integration error from keeping accumulating and eventually blowing up the actuator. Although the PID controller worked well in this project and the anti-windup mechnism was not necessary in the end, it is still a good practice to protect the controller from winding up.
+
 ---
 
 ## Dependencies
