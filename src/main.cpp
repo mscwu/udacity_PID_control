@@ -41,7 +41,7 @@ int main()
   bool tuning = false;
 
   // initialize this for validation lap
-  double p[3] = {0.122, 0.0, 0.45};  
+  double p[3] = {0.122, 0.0, 0.4};  
   if (tuning) {
     // initialize this for tuning lap
     p[0] = 0.12;
