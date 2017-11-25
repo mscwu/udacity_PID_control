@@ -57,7 +57,7 @@ int main()
 
   const int max_step = 400;
 
-  double max_speed = 32;
+  double max_speed = 22;
 
   int step = 0;
 
