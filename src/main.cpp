@@ -45,10 +45,10 @@ int main()
   if (tuning) {
     // initialize this for tuning lap
     p[0] = 0.12;
-    p[1] = 0.001;
+    p[1] = 0.0;
     p[2] = 0.4;
   }
-  double dp[3] = {0.002, 0.00005, 0.005};
+  double dp[3] = {0.001, 0.0, 0.005};
   
   pid.Init(p[0], p[1], p[2]);
   speed_control.Init(0.1 ,0, 0.01);
@@ -57,7 +57,7 @@ int main()
 
   const int max_step = 400;
 
-  double max_speed = 22;
+  double max_speed = 32;
 
   int step = 0;
 
