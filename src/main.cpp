@@ -34,12 +34,14 @@ int main()
   uWS::Hub h;
 
   PID pid;
+
+  PID speed_control;
   // TODO: Initialize the pid variable.
 
   bool tuning = false;
 
   // initialize this for validation lap
-  double p[3] = {0.122, 0.001, 0.4};  
+  double p[3] = {0.122, 0.0, 0.45};  
   if (tuning) {
     // initialize this for tuning lap
     p[0] = 0.12;
@@ -49,12 +51,13 @@ int main()
   double dp[3] = {0.002, 0.00005, 0.005};
   
   pid.Init(p[0], p[1], p[2]);
+  speed_control.Init(0.1 ,0, 0.01);
 
   const int transition_steps = 30;
 
   const int max_step = 400;
 
-  double max_speed = 20;
+  double max_speed = 22;
 
   int step = 0;
 
@@ -66,7 +69,7 @@ int main()
 
 
 
-  h.onMessage([&pid, &step, &transition_steps, &max_step, &p, &dp, &i, &epoch, &max_it, &max_speed, &tuning](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &step, &transition_steps, &max_step, &p, &dp, &i, &epoch, &max_it, &max_speed, &tuning, &speed_control](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -183,6 +186,7 @@ int main()
 	        		step = 0;
 	        		epoch += 1;
               std::cout << "Epoch: " << epoch << std::endl;
+              speed_control.ResetPIDError();
 	        		pid.Restart(ws);
           	}
           }
@@ -196,6 +200,7 @@ int main()
           */
           pid.UpdateError(cte);
 
+
           double PD_error = -pid.Kp * pid.p_error - pid.Kd * pid.d_error;
           steer_value = PD_error - pid.Ki * pid.i_error;
 
@@ -206,9 +211,17 @@ int main()
           std::cout << "i error: " << pid.i_error << std::endl;
           std::cout << "d error: " << pid.d_error << std::endl;
 
-          if (speed > max_speed) {
-            throttle = 0;
+          speed_control.UpdateError(speed - max_speed);
+          throttle = -speed_control.Kp * speed_control.p_error - speed_control.Ki * speed_control.i_error - speed_control.Kd * speed_control.d_error;
+          if (throttle > 1) {
+            throttle = 1;
           }
+          else if (throttle < -1) {
+            throttle = -1;
+          }
+          // if (speed > max_speed) {
+          //   throttle = 0;
+          // }
           // else if (std::abs(cte)>2 && speed > 0.5*max_speed && std::abs(angle)>5 ) {
           //   throttle = -0.2;
           // }
